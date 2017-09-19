@@ -11,7 +11,6 @@ use ZanPHP\Support\Arr;
 class Trace implements TraceContract
 {
     private $run;
-
     /**
      * @var Tracer
      */
@@ -35,6 +34,7 @@ class Trace implements TraceContract
             $traceClass = $config['trace_class'];
             if (is_subclass_of($traceClass, Tracer::class)) {
                 $this->run = true;
+                $this->index = 0;
                 $this->traceImp = new $traceClass($rootId, $parentId);
                 return;
             } else {
@@ -93,8 +93,40 @@ class Trace implements TraceContract
         if (!$this->run) {
             return false;
         }
-
         $this->traceImp->logEvent($type, $status, $name, $context);
+    }
+
+    public function logError($type, $name, \Exception $error)
+    {
+        if (!$this->run) {
+            return false;
+        }
+        $context = "\n".$error->getMessage()."\n".$error->getTraceAsString()."\n";
+
+        $this->traceImp->logEvent($type,'error',$name,$context);
+    }
+
+    public function logMetricForCount($name, $quantity = 1)
+    {
+        if (!$this->run) {
+            return false;
+        }
+        $this->traceImp->logMetricForCount($name,$quantity);
+    }
+
+    public function logMetricForSum($name, $value = 1.0)
+    {
+        if (!$this->run) {
+            return false;
+        }
+        $this->traceImp->logMetricForSum($name,$value);
+    }
+
+    public function logHeartbeat($type,$name='',$content=''){
+        if (!$this->run) {
+            return false;
+        }
+        $this->traceImp->logHeartbeat($type,$name,$content);
     }
 
     public function setRemoteCallMsgId($remoteCallMsgId)
@@ -129,4 +161,5 @@ class Trace implements TraceContract
     {
         return TraceBuilder::generateId();
     }
+
 }

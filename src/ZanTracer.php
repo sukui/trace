@@ -17,6 +17,7 @@ class ZanTracer extends Tracer
     private $ip;
     private $pid;
     private $builder;
+    private $index=0;
 
     /*
      * 存放traceBegin数据,key为begin的位置,value为trace数据
@@ -93,6 +94,7 @@ class ZanTracer extends Tracer
 
         $trace[0] = $sec + $usec;
         $this->data[] = $trace;
+        $this->index++;
 
         return count($this->data) - 1;
     }
@@ -109,8 +111,16 @@ class ZanTracer extends Tracer
         $data = $this->data[$handle];
         $this->data[$handle] = null;
         $utime = floor(($sec + $usec - $data[0]) * 1000000);
+
+        //嵌入事件判断
+        if(($this->index-1) == $handle){
+            $mTime = "A{$time}";
+        }else{
+            $mTime = "T{$time}";
+        }
+
         $trace = [
-            "T$time",
+            $mTime,
             $data[1],
             $data[2],
             addslashes($status),
@@ -164,6 +174,72 @@ class ZanTracer extends Tracer
             $status,
             addslashes($context),
         ];
+        $this->index++;
+        $this->builder->buildEvent($trace);
+    }
+
+    public function logError($type, $name, \Exception $error)
+    {
+        $context = "\n".$error->getMessage()."\n".$error->getTraceAsString()."\n";
+        $this->logEvent($type,'error',$name,$context);
+    }
+
+    public function logMetricForCount($name, $quantity = 1)
+    {
+        list($usec, $sec) = explode(' ', microtime());
+        $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
+
+        if (!is_scalar($name)) {
+            $name = json_encode($name);
+        }
+        $quantity = intval($quantity);
+        $trace = [
+            "M$time",
+            '',
+            $name,
+            'C',
+            $quantity,
+        ];
+        $this->index++;
+        $this->builder->buildEvent($trace);
+    }
+
+    public function logMetricForSum($name, $value = 1.0)
+    {
+        list($usec, $sec) = explode(' ', microtime());
+        $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
+
+        if (!is_scalar($name)) {
+            $name = json_encode($name);
+        }
+        $value = sprintf("%.2f", $value);
+        $trace = [
+            "M$time",
+            '',
+            $name,
+            'S',
+            $value,
+        ];
+        $this->index++;
+        $this->builder->buildEvent($trace);
+    }
+
+    public function logHeartbeat($type,$name='',$content='')
+    {
+        list($usec, $sec) = explode(' ', microtime());
+        $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
+
+        if (!is_scalar($name)) {
+            $name = json_encode($name);
+        }
+        $trace = [
+            "H$time",
+            $type,
+            $name,
+            '0',
+            $content,
+        ];
+        $this->index++;
         $this->builder->buildEvent($trace);
     }
 
@@ -186,4 +262,6 @@ class ZanTracer extends Tracer
             echo_exception($e);
         }
     }
+
 }
+
