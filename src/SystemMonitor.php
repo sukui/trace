@@ -22,8 +22,8 @@ class SystemMonitor
     public function bootstrap($server,$workerId)
     {
         if($workerId == 0){
-            $this->timer_id = Timer::tick(60,function ()use($server){
-                $stats = $server->stats();
+            $this->timer_id = Timer::tick(60000,function ()use($server){
+                $stats = $server->swooleServer->stats();
                 $data['app.connection_num'] = $stats['connection_num'];
                 $data['app.total_worker'] = $stats['total_worker'];
                 $data['app.active_worker'] = $stats['active_worker'];
