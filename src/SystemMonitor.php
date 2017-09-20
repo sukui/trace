@@ -34,9 +34,9 @@ class SystemMonitor
         $info = array_merge($data,$info);
         $str = null;
         foreach ($info as $key=>$value){
-            if ($key != null) {
+            if (is_scalar($key)) {
                 $pair = $key;
-                if ($value!= null){
+                if (is_scalar($key)){
                     $pair.= "=" . $value;
                 }
                 if ($str == null) {
@@ -100,10 +100,9 @@ class SystemMonitor
 
     //系统负载
     protected function getLoadAvg(){
-        $strs = @file("/proc/loadavg");
-        $str = explode(" ", implode("", $strs));
-        $str = array_chunk($str, 4);
-        $res['system.loadAvg'] = implode(" ", $str[0]);
+        $str = @file_get_contents("/proc/loadavg");
+        $str = explode(" ", $str);
+        $res['system.loadAvg'] = $str[0];
         return $res;
     }
 
@@ -114,7 +113,7 @@ class SystemMonitor
         $data2 = yield $this->getNetInfo();
         $result = [];
         foreach ($data1 as $key => $value){
-            $result[$key] = $data2[$key]-$data1[$key];
+            $result[$key] = round($data2[$key]-$data1[$key],2);
         }
         yield $result;
     }
