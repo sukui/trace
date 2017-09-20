@@ -36,7 +36,7 @@ class SystemMonitor
         foreach ($info as $key=>$value){
             if (is_scalar($key)) {
                 $pair = $key;
-                if (is_scalar($key)){
+                if (is_scalar($value)){
                     $pair.= "=" . $value;
                 }
                 if ($str == null) {
