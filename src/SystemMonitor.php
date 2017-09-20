@@ -30,7 +30,7 @@ class SystemMonitor
 
     public function upload($data){
         $repository = make(Repository::class);
-        $info = $this->getSystemInfo();
+        $info = yield $this->getSystemInfo();
         $info = array_merge($data,$info);
         $str = null;
         foreach ($info as $key=>$value){
@@ -59,10 +59,10 @@ class SystemMonitor
 
     //获取系统信息
     public function getSystemInfo(){
-        $mem  =  $this->getSystemInfo();
+        $mem  =  $this->getMemoryInfo();
         $load =  $this->getLoadAvg();
-        $net  =  $this->getNetSpeed();
-        return array_merge($mem,$load,$net);
+        $net  = yield  $this->getNetSpeed();
+        yield array_merge($mem,$load,$net);
     }
 
     //内存信息
@@ -95,7 +95,7 @@ class SystemMonitor
             'swap.free' => $res['swapFree'],
             'swap.percent' => $res['swapPercent'],
         ];
-        yield $result;
+        return $result;
     }
 
     //系统负载
@@ -104,7 +104,7 @@ class SystemMonitor
         $str = explode(" ", implode("", $strs));
         $str = array_chunk($str, 4);
         $res['system.loadAvg'] = implode(" ", $str[0]);
-        yield $res;
+        return $res;
     }
 
     //网速
@@ -130,7 +130,7 @@ class SystemMonitor
             $result["{$eth}.input"] = round($info[2][0] / 1024 , 2);
             $result["{$eth}.output"] = round($info[10][0] / 1024 , 2);
         }
-        yield $result;
+        return $result;
     }
 
 
