@@ -2,6 +2,7 @@
 namespace ZanPHP\Trace;
 
 use ZanPHP\Config\Repository;
+use ZanPHP\Contracts\Trace\Constant;
 use ZanPHP\Coroutine\Task;
 use ZanPHP\Timer\Timer;
 use ZanPHP\Utilities\File\OnceFile;
@@ -52,7 +53,7 @@ class SystemMonitor
         $trace->initHeader();
         $traceHandle = $trace->transactionBegin("System", "Status");
         $trace->logHeartbeat("Heartbeat",$ip,$str);
-        $trace->commit($traceHandle,'0','End');
+        $trace->commit($traceHandle,Constant::SUCCESS,'End');
         //send数据
         yield $trace->send();
     }
