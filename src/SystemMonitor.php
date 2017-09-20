@@ -1,18 +1,10 @@
 <?php
-/**
- * 代码来自workerman文件监控重启代码
- * 建议只允许开发环境使用
- * workerman(http://www.workerman.net)
- * @author walkor<walkor@workerman.net>
- * @link https://github.com/walkor/workerman-filemonitor
- */
-
 namespace ZanPHP\Trace;
 
 use ZanPHP\Config\Repository;
 use ZanPHP\Coroutine\Task;
 use ZanPHP\Timer\Timer;
-use ZanPHP\Utilities\File\File;
+use ZanPHP\Utilities\File\OnceFile;
 
 class SystemMonitor
 {
@@ -38,7 +30,7 @@ class SystemMonitor
 
     public function upload($data){
         $repository = make(Repository::class);
-        $info = yield $this->getSystemInfo();
+        $info = $this->getSystemInfo();
         $info = array_merge($data,$info);
         $str = null;
         foreach ($info as $key=>$value){
@@ -65,19 +57,17 @@ class SystemMonitor
         yield $trace->send();
     }
 
+    //获取系统信息
     public function getSystemInfo(){
-        $mem = yield $this->getSystemInfo();
-        $load = yield $this->getLoadAvg();
-        $net = yield $this->getNetSpeed();
-        yield array_merge($mem,$load,$net);
+        $mem  =  $this->getSystemInfo();
+        $load =  $this->getLoadAvg();
+        $net  =  $this->getNetSpeed();
+        return array_merge($mem,$load,$net);
     }
 
     //内存信息
     protected function getMemoryInfo(){
-        $file = "/proc/meminfo";
-        $obj = new File($file);
-        $content = yield $obj->read(-1);
-        $strs = explode("\n",trim($content));
+        $strs = @file("/proc/meminfo");
         $str = implode("", $strs);
         preg_match_all("/MemTotal\s{0,}\:+\s{0,}([\d\.]+).+?MemFree\s{0,}\:+\s{0,}([\d\.]+).+?Cached\s{0,}\:+\s{0,}([\d\.]+).+?SwapTotal\s{0,}\:+\s{0,}([\d\.]+).+?SwapFree\s{0,}\:+\s{0,}([\d\.]+)/s", $str, $buf);
         preg_match_all("/Buffers\s{0,}\:+\s{0,}([\d\.]+)/s", $str, $buffers);
@@ -110,16 +100,14 @@ class SystemMonitor
 
     //系统负载
     protected function getLoadAvg(){
-        $file = "/proc/loadavg";
-        $obj = new File($file);
-        $content = yield $obj->read(-1);
-        $strs = explode("\n",trim($content));
+        $strs = @file("/proc/loadavg");
         $str = explode(" ", implode("", $strs));
         $str = array_chunk($str, 4);
         $res['system.loadAvg'] = implode(" ", $str[0]);
         yield $res;
     }
 
+    //网速
     protected function getNetSpeed(){
         $data1 = yield $this->getNetInfo();
         yield taskSleep(1000);
@@ -131,12 +119,10 @@ class SystemMonitor
         yield $result;
     }
 
+    //网卡信息
     protected function getNetInfo()
     {
-        $file = "/proc/net/dev";
-        $obj = new File($file);
-        $str = yield $obj->read(-1);
-        $strs = explode("\n", trim($str));
+        $strs = @file("/proc/net/dev");
         $result = [];
         for ($i = 2; $i < count($strs); $i++) {
             preg_match_all("/([^\s]+):[\s]{0,}(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/", $strs[$i], $info);
