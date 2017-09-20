@@ -52,7 +52,7 @@ class SystemMonitor
         $trace = new Trace($config);
         $trace->initHeader();
         $traceHandle = $trace->transactionBegin("System", "Status");
-        $trace->logHeartbeat("Heartbeat",$ip,$str);
+        $trace->logHeartbeat("Heartbeat",Constant::SUCCESS,$ip,$str);
         $trace->commit($traceHandle,Constant::SUCCESS,'End');
         //send数据
         yield $trace->send();
