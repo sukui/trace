@@ -7,6 +7,7 @@ use ZanPHP\ConnectionPool\TCP\TcpClient;
 use ZanPHP\ConnectionPool\TCP\TcpClientEx;
 use ZanPHP\Contracts\ConnectionPool\ConnectionManager;
 use ZanPHP\Contracts\Foundation\Application;
+use ZanPHP\Contracts\Trace\Constant;
 use ZanPHP\Contracts\Trace\Tracer;
 
 class ZanTracer extends Tracer
@@ -236,7 +237,7 @@ class ZanTracer extends Tracer
             "H$time",
             $type,
             $name,
-            '0',
+            Constant::SUCCESS,
             $content,
         ];
         $this->index++;

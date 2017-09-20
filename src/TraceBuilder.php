@@ -46,8 +46,10 @@ class TraceBuilder
 
     public function getData()
     {
-        $strlen = pack("N*", strlen($this->data));
-        return $strlen . $this->data;
+        $len = strlen($this->data);
+        $head = pack("N", $len);
+        $body = pack("a{$len}",$this->data);
+        return $head . $body;
     }
 
     public static function generateId()
