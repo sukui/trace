@@ -62,15 +62,18 @@ class TraceBuilder
             }
         }
 
-        $microtime = str_replace('.', '', microtime(true));
+        list($usec, $sec) = explode(" ", microtime());
+        $index = (($sec % 3600) << 20) | ($usec * 1024 * 1024);
+
+        $hourStamp = (int) ($sec/3600);
 
         /** @var Application $application */
         $application = make(Application::class);
         $data = [
             $application->getName(),
             self::$hexIp,
-            $microtime,
-            rand(100000, 999999)
+            $hourStamp,
+            $index
         ];
         $data = implode('-', $data);
         return $data;
