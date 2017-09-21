@@ -8,6 +8,7 @@ class TraceBuilder
 {
     private $data = "";
     private static $hexIp = null;
+    private static $index=1000;
 
     protected function lintSeparator(array &$data)
     {
@@ -62,10 +63,10 @@ class TraceBuilder
             }
         }
 
-        list($usec, $sec) = explode(" ", microtime());
-        $index = (($sec % 3600) << 20) | ($usec * 1024 * 1024);
+        $index = self::$index;
+        self::$index = (self::$index+1)%100000;
 
-        $hourStamp = (int) ($sec/3600);
+        $hourStamp = (int) (time()/3600);
 
         /** @var Application $application */
         $application = make(Application::class);
