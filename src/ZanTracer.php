@@ -114,7 +114,7 @@ class ZanTracer extends Tracer
         $utime = floor(($sec + $usec - $data[0]) * 1000000);
 
         //嵌入事件判断
-        if(($this->index-1) == $handle){
+        if($handle != 0 && ($this->index-1) == $handle){
             $mTime = "A{$time}";
         }else{
             $mTime = "T{$time}";
