@@ -10,6 +10,7 @@ class TraceBuilder
     private static $hexIp = null;
     private static $index=1;
     private static $hourStamp=0;
+    private static $pid=false;
 
     protected function lintSeparator(array &$data)
     {
@@ -64,7 +65,11 @@ class TraceBuilder
             }
         }
 
-        $hourStamp = intval(time()/3600) + $_SERVER['WORKER_ID'];
+        if(!self::$pid){
+            self::$pid = getenv('pid');
+        }
+
+        $hourStamp = intval(time()/3600) + self::$pid;
         if($hourStamp != self::$hourStamp){
             self::$index = 1;
             self::$hourStamp = $hourStamp;
