@@ -120,6 +120,10 @@ class ZanTracer extends Tracer
             $mTime = "T{$time}";
         }
 
+        if (!is_scalar($sendData)) {
+            $sendData = json_encode($sendData);
+        }
+
         $trace = [
             $mTime,
             $data[1],
