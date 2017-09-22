@@ -8,7 +8,8 @@ class TraceBuilder
 {
     private $data = "";
     private static $hexIp = null;
-    private static $index=1000;
+    private static $index=1;
+    private static $hourStamp=0;
 
     protected function lintSeparator(array &$data)
     {
@@ -62,9 +63,15 @@ class TraceBuilder
                 self::$hexIp = '0' . self::$hexIp;
             }
         }
-        $index = self::$index;
-        self::$index = (self::$index+1)%100000;
+
         $hourStamp = intval(time()/3600) + $_SERVER['WORKER_ID'];
+        if($hourStamp != self::$hourStamp){
+            self::$index = 1;
+            self::$hourStamp = $hourStamp;
+        }
+        $index = self::$index;
+        self::$index++;
+
         /** @var Application $application */
         $application = make(Application::class);
         $data = [
