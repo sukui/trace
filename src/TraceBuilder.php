@@ -64,7 +64,7 @@ class TraceBuilder
         }
         $index = self::$index;
         self::$index = (self::$index+1)%100000;
-        $hourStamp = intval((time()/3600).$_SERVER['WORKER_ID']);
+        $hourStamp = intval(time()/3600) + $_SERVER['WORKER_ID'];
         /** @var Application $application */
         $application = make(Application::class);
         $data = [
