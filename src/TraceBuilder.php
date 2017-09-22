@@ -62,12 +62,9 @@ class TraceBuilder
                 self::$hexIp = '0' . self::$hexIp;
             }
         }
-
         $index = self::$index;
         self::$index = (self::$index+1)%100000;
-
-        $hourStamp = (int) (time()/3600);
-
+        $hourStamp = intval((time()/3600).$_SERVER['WORKER_ID']);
         /** @var Application $application */
         $application = make(Application::class);
         $data = [
