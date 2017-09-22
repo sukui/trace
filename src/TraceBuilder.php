@@ -65,7 +65,7 @@ class TraceBuilder
             }
         }
 
-        if(!self::$pid){
+        if(!is_numeric(self::$pid)){
             self::$pid = is_numeric($_SERVER['WORKER_ID'])?$_SERVER['WORKER_ID']:getenv('pid');
         }
 
