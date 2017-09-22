@@ -66,15 +66,15 @@ class TraceBuilder
         }
 
         if(!self::$pid){
-            self::$pid = getenv('pid');
+            self::$pid = is_numeric($_SERVER['WORKER_ID'])?$_SERVER['WORKER_ID']:getenv('pid');
         }
 
-        $hourStamp = intval(time()/3600) + self::$pid;
+        $hourStamp = intval(time()/3600);
         if($hourStamp != self::$hourStamp){
             self::$index = 1;
             self::$hourStamp = $hourStamp;
         }
-        $index = self::$index;
+        $index = intval(self::$index.self::$pid);
         self::$index++;
 
         /** @var Application $application */
