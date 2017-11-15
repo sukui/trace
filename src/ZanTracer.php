@@ -116,8 +116,9 @@ class ZanTracer extends Tracer
         $utime = floor(($sec + $usec - $data[0]) * 1000000);
 
         //嵌入事件判断
-        if($handle != 0 && $this->currentTrace != null){
+        if($this->currentTrace != null){
             $mTime = "A{$time}";
+            $this->currentTrace = null;
         }else{
             $mTime = "T{$time}";
         }
@@ -159,15 +160,23 @@ class ZanTracer extends Tracer
     private function fixTrace($sec, $usec, $time)
     {
         $cnt = count($this->data);
-        for ($i = 1; $i < $cnt; $i++) {
+        for ($i = $cnt; $i > 1; $i--) {
             if ($this->data[$i] !== null) {
                 $data = $this->data[$i];
                 $this->data[$i] = null;
                 $utime = floor(($sec + $usec - $data[0]) * 1000000);
+
+                if($this->currentTrace != null){
+                    $mTime = "A{$time}";
+                    $this->currentTrace = null;
+                }else{
+                    $mTime = "T{$time}";
+                }
+
                 $trace = [
-                    "T$time",
-                    $data[1],
+                    $mTime,
                     $data[2],
+                    $data[3],
                     addslashes('fix timeout trace'),
                     $utime . "us",
                     addslashes('')
