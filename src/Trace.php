@@ -34,7 +34,6 @@ class Trace implements TraceContract
             $traceClass = $config['trace_class'];
             if (is_subclass_of($traceClass, Tracer::class)) {
                 $this->run = true;
-                $this->index = 0;
                 $this->traceImp = new $traceClass($rootId, $parentId);
                 return;
             } else {

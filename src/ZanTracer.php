@@ -18,7 +18,7 @@ class ZanTracer extends Tracer
     private $ip;
     private $pid;
     private $builder;
-    private $index=0;
+    private $currentTrace;
 
     /*
      * 存放traceBegin数据,key为begin的位置,value为trace数据
@@ -87,15 +87,17 @@ class ZanTracer extends Tracer
         $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
 
         $trace = [
+            $sec + $usec,
             "t$time",
             $type,
             $name,
         ];
-        $this->builder->buildTransaction($trace);
+        //$this->builder->buildTransaction($trace);
+        //$trace[0] = $sec + $usec;
 
-        $trace[0] = $sec + $usec;
+        $this->currentTrace = $trace;
+
         $this->data[] = $trace;
-        $this->index++;
 
         return count($this->data) - 1;
     }
@@ -114,7 +116,7 @@ class ZanTracer extends Tracer
         $utime = floor(($sec + $usec - $data[0]) * 1000000);
 
         //嵌入事件判断
-        if($handle != 0 && ($this->index-1) == $handle){
+        if($handle != 0 && $this->currentTrace != null){
             $mTime = "A{$time}";
         }else{
             $mTime = "T{$time}";
@@ -126,13 +128,29 @@ class ZanTracer extends Tracer
 
         $trace = [
             $mTime,
-            $data[1],
             $data[2],
+            $data[3],
             addslashes($status),
             $utime . "us",
             addslashes($sendData)
         ];
         $this->builder->commitTransaction($trace);
+    }
+
+    /**
+     * 标记当前未提交的trace
+     */
+    private function commitCurrentTrace(){
+        if($this->currentTrace != null){
+            $currentTrace = $this->currentTrace;
+            $this->currentTrace = null;
+            $trace = [
+                $currentTrace[1],
+                $currentTrace[2],
+                $currentTrace[3],
+            ];
+            $this->builder->buildTransaction($trace);
+        }
     }
 
     /*
@@ -179,13 +197,14 @@ class ZanTracer extends Tracer
             $status,
             addslashes($context),
         ];
-        $this->index++;
+        $this->commitCurrentTrace();
         $this->builder->buildEvent($trace);
     }
 
     public function logError($type, $name, \Exception $error)
     {
         $context = "\n".$error->getMessage()."\n".$error->getTraceAsString()."\n";
+        $this->commitCurrentTrace();
         $this->logEvent($type,'error',$name,$context);
     }
 
@@ -205,7 +224,7 @@ class ZanTracer extends Tracer
             'C',
             $quantity,
         ];
-        $this->index++;
+        $this->commitCurrentTrace();
         $this->builder->buildEvent($trace);
     }
 
@@ -225,7 +244,7 @@ class ZanTracer extends Tracer
             'S',
             $value,
         ];
-        $this->index++;
+        $this->commitCurrentTrace();
         $this->builder->buildEvent($trace);
     }
 
@@ -244,7 +263,7 @@ class ZanTracer extends Tracer
             Constant::SUCCESS,
             $content,
         ];
-        $this->index++;
+        $this->commitCurrentTrace();
         $this->builder->buildEvent($trace);
     }
 
