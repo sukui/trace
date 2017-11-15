@@ -95,6 +95,11 @@ class ZanTracer extends Tracer
         //$this->builder->buildTransaction($trace);
         //$trace[0] = $sec + $usec;
 
+        if($this->currentTrace != null){
+            $this->commitCurrentTrace();
+            $this->currentTrace = null;
+        }
+
         $this->currentTrace = $trace;
 
         $this->data[] = $trace;
