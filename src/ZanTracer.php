@@ -159,7 +159,7 @@ class ZanTracer extends Tracer
      */
     private function fixTrace($sec, $usec, $time)
     {
-        $cnt = count($this->data);
+        $cnt = count($this->data)-1;
         for ($i = $cnt; $i > 1; $i--) {
             if ($this->data[$i] !== null) {
                 $data = $this->data[$i];
