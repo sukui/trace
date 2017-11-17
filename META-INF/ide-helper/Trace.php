@@ -43,6 +43,25 @@ class Trace implements TraceContract
         $this->Trace->logEvent($type, $status, $name, $context);
     }
 
+    public function logError($type, $name, \Exception $error)
+    {
+        $this->Trace->logEvent($type,'error',$name,$context);
+    }
+
+    public function logMetricForCount($name, $quantity = 1)
+    {
+        $this->Trace->logMetricForCount($name,$quantity);
+    }
+
+    public function logMetricForSum($name, $value = 1.0)
+    {
+        $this->Trace->logMetricForSum($name,$value);
+    }
+
+    public function logHeartbeat($type,$name='',$content=''){
+        $this->Trace->logHeartbeat($type,$name,$content);
+    }
+
     public function setRemoteCallMsgId($remoteCallMsgId)
     {
         $this->Trace->setRemoteCallMsgId($remoteCallMsgId);
@@ -56,5 +75,10 @@ class Trace implements TraceContract
     public function send()
     {
         $this->Trace->send();
+    }
+
+    public static function generateId()
+    {
+        // TODO: Implement generateId() method.
     }
 }
