@@ -6,20 +6,27 @@
  * Time: 下午12:01
  */
 use ZanPHP\Contracts\Trace\Trace;
+use ZanPHP\Coroutine\Signal;
+use ZanPHP\Coroutine\SysCall;
+use ZanPHP\Coroutine\Task;
 
 /**
  * 点评cat追踪记录开始，必要和结束成对使用
  * @param $type
  * @param $name
- * @return int|bool
+ * @return SysCall
  */
 function logTransactionBegin($type, $name){
-    $trace = (yield getContext("trace"));
-    if ($trace instanceof Trace) {
-        return $trace->transactionBegin($type, $name);
-    }else{
-        return false;
-    }
+    return new SysCall(function (Task $task) use ($type, $name) {
+        $context = $task->getContext();
+        $trace = $context->get("trace");
+        if ($trace instanceof Trace) {
+            $task->send($trace->transactionBegin($type, $name));
+        }else{
+            $task->send(false);
+        }
+        return Signal::TASK_CONTINUE;
+    });
 }
 
 /**
@@ -27,19 +34,23 @@ function logTransactionBegin($type, $name){
  * @param $handle
  * @param $status
  * @param string $sendData
- * @return bool
+ * @return SysCall
  */
 function logTransactionEnd($handle, $status, $sendData = ''){
-    if(!empty($handle)){
-        $trace = (yield getContext("trace"));
-        if ($trace instanceof Trace) {
-            return $trace->commit($handle,$status,$sendData);
+    return new SysCall(function (Task $task)use($handle,$status,$sendData){
+        if(!empty($handle)){
+            $context = $task->getContext();
+            $trace = $context->get("trace");
+            if ($trace instanceof Trace) {
+                $task->send($trace->commit($handle,$status,$sendData));
+            }else{
+                $task->send(false);
+            }
         }else{
-            return false;
+            $task->send(false);
         }
-    }else{
-        return false;
-    }
+        return Signal::TASK_CONTINUE;
+    });
 }
 
 /**
@@ -48,15 +59,23 @@ function logTransactionEnd($handle, $status, $sendData = ''){
  * @param $status
  * @param string $name
  * @param string $context
- * @return bool
+ * @return SysCall
  */
 function logEvent($type, $status, $name = "", $context = ""){
-    $trace = (yield getContext("trace"));
-    if ($trace instanceof Trace) {
-        return $trace->logEvent($type,$status,$name,$context);
-    }else{
-        return false;
-    }
+    return new SysCall(function (Task $task)use($type,$status,$name,$context){
+        if(!empty($handle)){
+            $context = $task->getContext();
+            $trace = $context->get("trace");
+            if ($trace instanceof Trace) {
+                $task->send($trace->logEvent($type,$status,$name,$context));
+            }else{
+                $task->send(false);
+            }
+        }else{
+            $task->send(false);
+        }
+        return Signal::TASK_CONTINUE;
+    });
 }
 
 /**
@@ -64,44 +83,55 @@ function logEvent($type, $status, $name = "", $context = ""){
  * @param $type
  * @param $name
  * @param Exception $error
- * @return bool
+ * @return SysCall
  */
 function logError($type, $name, \Exception $error){
-    $trace = (yield getContext("trace"));
-    if ($trace instanceof Trace) {
-        return $trace->logError($type,$name,$error);
-    }else{
-        return false;
-    }
+    return new SysCall(function (Task $task)use($type,$name,$error){
+        $context = $task->getContext();
+        $trace = $context->get("trace");
+        if ($trace instanceof Trace) {
+            $task->send($trace->logError($type,$name,$error));
+        }else{
+            $task->send(false);
+        }
+        return Signal::TASK_CONTINUE;
+    });
 }
 
 /**
  * 点评cat追踪 业务统计
  * @param $name
  * @param int $quantity
- * @return bool
+ * @return SysCall
  */
 function logMetricForCount($name, $quantity = 1){
-    $trace = (yield getContext("trace"));
-    if ($trace instanceof Trace) {
-        return $trace->logMetricForCount($name,$quantity);
-    }else{
-        return false;
-    }
+    return new SysCall(function (Task $task)use($name,$quantity){
+        $context = $task->getContext();
+        $trace = $context->get("trace");
+        if ($trace instanceof Trace) {
+            $task->send($trace->logMetricForCount($name,$quantity));
+        }else{
+            $task->send(false);
+        }
+        return Signal::TASK_CONTINUE;
+    });
 }
 
 /**
  * 点评cat追踪业务额度统计
  * @param $name
  * @param float $value
- * @return bool
+ * @return SysCall
  */
 function logMetricForSum($name, $value = 1.0){
-    $trace = (yield getContext("trace"));
-    if ($trace instanceof Trace) {
-        return $trace->logMetricForSum($name,$value);
-    }else{
-        return false;
-    }
+    return new SysCall(function (Task $task)use($name,$value){
+        $context = $task->getContext();
+        $trace = $context->get("trace");
+        if ($trace instanceof Trace) {
+            $task->send($trace->logMetricForSum($name,$value));
+        }else{
+            $task->send(false);
+        }
+        return Signal::TASK_CONTINUE;
+    });
 }
-
