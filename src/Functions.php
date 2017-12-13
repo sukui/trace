@@ -58,15 +58,15 @@ function logTransactionEnd($handle, $status, $sendData = ''){
  * @param $type
  * @param $status
  * @param string $name
- * @param string $context
+ * @param string $data
  * @return SysCall
  */
-function logEvent($type, $status, $name = "", $context = ""){
-    return new SysCall(function (Task $task)use($type,$status,$name,$context){
+function logEvent($type, $status, $name = "", $data = ""){
+    return new SysCall(function (Task $task)use($type,$status,$name,$data){
         $context = $task->getContext();
         $trace = $context->get("trace");
         if ($trace instanceof Trace) {
-            $task->send($trace->logEvent($type, $status, $name, $context));
+            $task->send($trace->logEvent($type, $status, $name, $data));
         } else {
             $task->send(false);
         }
